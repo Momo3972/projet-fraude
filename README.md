@@ -1,116 +1,73 @@
-# projet-fraude
-# 💳 Détection de Fraude sur Transactions Bancaires
+# 🧠 Projet : Détection de fraude bancaire
 
-Ce projet vise à détecter automatiquement les transactions bancaires frauduleuses à partir du dataset public [Credit Card Fraud Detection (Kaggle)](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
-
----
-
-## 📂 Structure du projet
-
-
-projet-fraude/
-│
-├── creditcard.csv # Dataset Kaggle
-├── fraude_detection.ipynb # Notebook principal
-├── reports/
-│ ├── metrics.json # Résultats et scores des modèles
-│ └── figures/ # Visualisations exportées (PR, ROC, CM)
-├── models/ # Modèles entraînés (.joblib)
-├── .git/ # Suivi de version
-└── README.md # Présent fichier
-
+**Auteur :** Mohamed Lamine OULD BOUYA  
+**Objectif :** Concevoir un modèle de classification capable d’identifier les transactions frauduleuses avec un **haut rappel** et une **bonne précision-rappel (PR-AUC)**, malgré un **déséquilibre extrême** entre transactions normales et frauduleuses.
 
 ---
 
-## ⚙️ Étapes du pipeline
-
-1. **Chargement et typage mémoire léger**  
-   - Conversion des variables numériques en `float32`  
-   - Variable cible `Class` en `int8`
-
-2. **EDA rapide**  
-   - Distribution fortement déséquilibrée (≈ 0.17 % de fraudes).  
-   - Montants très concentrés sous 500 €.  
-
-3. **Split stratifié 80/20 (train/test)**  
-   - Préserve la proportion de fraudes dans chaque échantillon.
-
-4. **Modèles entraînés**
-   - **Baseline :** Régression Logistique (données brutes, sans optimisation)  
-   - **Optimisé :** Pipeline `StandardScaler + SMOTE + LogisticRegression` (GridSearchCV)
-   - **Comparaison :** RandomForest & XGBoost (mêmes données, métriques homogènes)
+## 📊 Données
+- **Source :** [Kaggle - Credit Card Fraud Detection](https://www.kaggle.com/mlg-ulb/creditcardfraud)
+- **Taille :** 284 807 transactions, dont seulement **0.17 %** de fraudes
 
 ---
 
-## 📊 Résultats – modèle optimisé (train)
-
-*(données extraites automatiquement depuis `reports/metrics.json`)*
-
-| Métrique | Valeur |
-|-----------|--------|
-| Precision | 0.85 |
-| Recall | 0.92 |
-| F1-score | 0.88 |
-| ROC-AUC | 0.98 |
-| PR-AUC | 0.91 |
-| Seuil optimal (Fβ=2) | 0.43 |
-
-> 🔹 Ces scores reflètent le modèle **optimisé (SMOTE + GridSearch)** sur le jeu d’entraînement.  
-> Les métriques sont sauvegardées dans `reports/metrics.json` et mises à jour à chaque ré-entraînement.
+## ⚙️ Stack technique
+- **Langage :** Python  
+- **Librairies :** `pandas`, `scikit-learn`, `imbalanced-learn`, `xgboost`, `matplotlib`, `seaborn`  
 
 ---
 
-## 🧠 Comparaison des modèles (test)
-
-| Modèle | PR-AUC | ROC-AUC | F2-score | Commentaire |
-|---------|--------|----------|-----------|
-| LogisticRegression (Baseline) | 0.72 | 0.95 | 0.64 | Référence brute |
-| LogisticRegression + SMOTE | 0.91 | 0.98 | 0.88 | Meilleur équilibre précision/rappel |
-| RandomForest | 0.90 | 0.99 | 0.87 | Stable, bon rappel |
-| XGBoost | 0.93 | 0.99 | 0.89 | Léger gain global |
+## 🧩 Méthodologie
+- **Prétraitement :**
+  - Standardisation des variables
+  - Gestion du déséquilibre via **SMOTE**  
+- **Validation :**
+  - Découpage **stratifié (80/20)** pour le train/test
+  - **Cross-validation (CV) stratifiée** pour l’optimisation
+- **Optimisation :**
+  - **GridSearchCV** appliqué à la **Logistic Regression** (pénalités, régularisation)
+  - Recherche du **seuil optimal Fβ (β=2)** pour maximiser le rappel pondéré
 
 ---
 
-## 📈 Visualisations
+## 📈 Évaluation
+- **Métriques principales :**
+  - PR-AUC (*Average Precision*)  
+  - ROC-AUC  
+  - **Rappel**, **Précision**, **F1-score**  
+  - Matrice de confusion
+- **Comparaison de modèles :**
+  - Logistic Regression *(baseline & optimisée)*  
+  - RandomForest  
+  - XGBoost
+- **Critère de sélection :**
+  - Meilleure balance **précision / rappel**
+  - Performances évaluées sur **données test indépendantes**
 
-Les figures associées sont disponibles dans `reports/figures/` :
-- `pr_curve_train.png` — Courbe Précision-Rappel  
-- `roc_curve_train.png` — Courbe ROC  
-- `confusion_matrix_train.png` — Matrice de confusion  
+---
 
-Exemple de visualisation :
-```text
-.
-├── reports/
-│   ├── figures/
-│   │   ├── pr_curve_train.png
-│   │   ├── roc_curve_train.png
-│   │   └── confusion_matrix_train.png
+## 💾 Sorties et artefacts
+- **Figures :** courbes PR et ROC, matrices de confusion, importances des features  
+- **Fichiers sauvegardés :**
+  - `reports/metrics.json` — performances comparatives des modèles  
+  - `reports/figures/` — figures PR, ROC, importances, matrices de confusion  
+  - `train_split.csv` / `test_split.csv` — échantillons d’entraînement et de test  
 
-## Technologies et librairies
-- Python 3.12
-- Scikit-learn
-- Imbalanced-learn (SMOTE)
-- XGBoost
-- Matplotlib / Seaborn
-- Pandas / Numpy
-- Joblib (export modèle)
+---
 
-## Exécution rapide
-1️⃣ Cloner le repo
-git clone https://github.com/<ton-utilisateur>/projet-fraude.git
-cd projet-fraude
+## 🚀 Résumé
+Ce projet illustre la construction complète d’un pipeline de détection de fraude, de la préparation des données jusqu’à l’évaluation des modèles, en appliquant les **bonnes pratiques de Machine Learning** (validation croisée, seuil optimal, gestion du déséquilibre, export des artefacts).  
+Les résultats montrent une amélioration significative du **PR-AUC** et du **rappel** grâce à l’optimisation des modèles et à l’intégration de techniques de rééchantillonnage.
 
-2️⃣ Lancer le notebook
-jupyter notebook fraude_detection.ipynb
+---
 
-3️⃣ Regarder les résultats
-Les métriques et figures se trouvent dans :
-reports/metrics.json
-reports/figures/
+## 📊 Résultats comparatifs
+
+| Modèle | PR-AUC | ROC-AUC | Précision | Rappel | F1-score | Seuil |
+|:--|--:|--:|--:|--:|--:|--:|
+| LR + SMOTE (grid) | 0.7197 | 0.9708 | 0.7961 | 0.8367 | 0.8159 | 1.000 |
+| RandomForest | 0.8623 | 0.9515 | 0.8349 | 0.8776 | 0.8557 | 0.170 |
+| XGBoost | 0.8741 | 0.9563 | 0.8492 | 0.8830 | 0.8657 | 0.150 |
 
 
-## Auteur
 
-Projet réalisé par Mohamed Lamine OULD BOUYA (Etudiant en formation Data Scientist)
-Basé sur le dataset ULB / Kaggle — Credit Card Fraud Detection (Europe, 2013)
